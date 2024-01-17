@@ -1,0 +1,36 @@
+SENSORE PER BOTTE DI VINO
+- Usa il sensore di temperatura e umidità per monitorare le condizioni ambientali.
+	Manda i dati al sito, vengono salvati su db e utilizzati per grafici di statistiche
+- Imposta sul sito una pianificazione in base alle preferenze dell'utente:
+	Puo impostare orari in cui ricordare di innaffiare la pianta e soglie di temperatura e umidita da segnalare
+- Attiva il buzzer passivo per avvisare quando è il momento di irrigare le piante, regolare la temperatura, ecc.
+- Striscia led rgb segnala se e' tutto a posto oppure ci sono problemi
+- Schermo lcd mostra sul vaso l'attuale temperatura e umidita' e se e' il momento di bagnare la pianta
+
+ E' scalabile
+
+progetto che stiamo sviluppando in azienda dove stiamo testando arduino e le sue potenzialita' 
+
+----
+progetto per cantine vinicole 
+- per ogni botte metto il sensore di umidita' e temperatura e un led rgb verde/arancio/rosso
+- le botti sono raggruppate per scaffali, per ogni scaffale ho uno schermo lcd, che dice se e' tutto a posto e i valori medi 
+	oppure dice quale botte deve essere controllata, e una striscia led verde/arancio/rosso
+
+prototipo e demo su singolo sensore 
+idea scalabile, low cost, facile da gestire che non richiede un assistenza da terze parti
+
+-----
+Un vinificio e' diviso in stanze, per fare un buon vino e' molto importante tenere traccia di umidita', temperatura, illunamento medio
+- temperatura dell’aria per vini rossi 12-14°C;
+- temperatura dell’aria per vini bianchi 10-11°C;
+- velocità costante dell’aria 1 m/s;
+- tasso di umidità relativa 80/85 %;
+- illuminamento medio non superiore ai 250-300 lux;
+- evitare assolutamente vibrazioni e odori sgradevoli intensi.
+
+Per ogni stanza e' quindi presente un sensore per um e temp e uno per la luce all'interno, mentre all'esterno e' 
+presente uno schermo lcd che mostra i valori e in chiaro se ci sono problemi, un led rgb e un buzzer passivo
+
+I dati letti per ogni stanza vengono mandati al programma che li salva su db e li mostra in grafici
+E' possibile gestire le configurazioni delle soglie delle diverse stanze
