@@ -1,0 +1,23 @@
+<table id="tab_sensor" class="display" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Id Sensor</th>
+            <th>Id Wine</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        {{#each this}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{id_wine}}</td>
+                <td>{{name}}</td>
+            </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<script>
+    new DataTable('#tab_sensor');
+</script>

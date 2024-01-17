@@ -1,4 +1,4 @@
-const Arduino = require('./Arduino');
+//const Arduino = require('./Arduino');
 const Store = require('./Store');
 const config = require('./config');
 
@@ -8,18 +8,57 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
+const hbs = require('hbs');
+const fs = require('fs');
+const datatable = require('datatables.net');
+
 const app = express();
 
-const arduino = new Arduino();
-const store = new Store();
+//const arduino = new Arduino();
+const store = new Store;
+store.construct();
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.set('view engine', 'ejs');
-app.use(express.static('files'));
-app.use(express.static('js'));
-app.use(express.static('lib'));
+
+app.use(express.static(__dirname + '/views/css'));
+app.use(express.static(__dirname + '/views/js'));
+app.use(express.static(__dirname + '/lib'));
+
+
+hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'))
+
+//-------------------NODE SERVER----------------------------
+
+app.get('/', (req,res)=>{
+
+    res.render('index');
+});
+
+app.get('/tab_sensors', async (req,res)=>{
+    const data = await store.getAllSensor();
+
+    console.log(data)
+
+    res.locals = data;
+    res.render('tab_sensors');
+});
+
+app.get('/tab_values', (req,res)=>{
+    
+});
+
+app.get('/tab_wines', (req,res)=>{
+    
+});
+
+app.listen(config.node_port, config.ip, function () {
+    console.log(`Node vinicola listening on ${config.node_port}`);
+});
+
 
 //--------------WS SERVER--------------------------------
 
@@ -73,13 +112,4 @@ wsServer.on('request', function(request) {
     connection.on('close', function(reasonCode, description) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
-});
-
-
-//-------------------NODE SERVER----------------------------
-
-
-
-app.listen(config.node_port, config.ip, function () {
-    console.log(`Node vinicola listening on ${config.node_port}`);
 });

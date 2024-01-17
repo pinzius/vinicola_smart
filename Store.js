@@ -41,15 +41,16 @@ GROUP BY ${config.table_sensor.id}`;
     }
 
     getSensor(key){
-        const query = `SELECT * FROM ${config.table_sensor} 
+        const query = `SELECT ${config.table_sensor}.id,${config.table_wine}.id,${config.table_wine}.name FROM ${config.table_sensor} 
 INNER JOIN ${config.table_wine} ON ${config.table_sensor}.id_wine = ${config.table_wine}.id 
 WHERE name = ?`;
         return this.execQuery(query,key);
     }
-    getAllSensor(key){
-        const query = `SELECT * FROM ${config.table_sensor} 
+
+    getAllSensor(){
+        const query = `SELECT ${config.table_sensor}.id, ${config.table_sensor}.id_wine, ${config.table_wine}.name FROM ${config.table_sensor}
 INNER JOIN ${config.table_wine} ON ${config.table_sensor}.id_wine = ${config.table_wine}.id`;
-        return this.execQuery(query,key);
+        return this.execQuery(query);
     }
 
     getWine(key){
