@@ -3,7 +3,7 @@ const mysql = require('mysql');
 const config = require('./config');
 
 class Store{
-    construct(){
+    constructor(){
         this.connection = mysql.createConnection({
             host: config.host,
             user: config.user,
@@ -24,7 +24,6 @@ class Store{
                 if (err)
                     reject(err);
                 else{
-                    console.log('Data fetched');
                     resolve(results);
                 }
             });
@@ -36,7 +35,7 @@ class Store{
         const query = `SELECT * FROM ${config.table_sensor} 
 INNER JOIN ${config.table_wine} ON ${config.table_sensor}.id_wine = ${config.table_wine}.id 
 INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor
-GROUP BY ${config.table_sensor.id}`;
+ORDER BY ${config.table_sensor}.id`;
         return this.execQuery(query);
     }
 
@@ -64,22 +63,21 @@ INNER JOIN ${config.table_wine} ON ${config.table_sensor}.id_wine = ${config.tab
     }
 
     getValue(key){
-        const query = `SELECT * FROM ${config.table_sensor} INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor WHERE name = ?`;
+        const query = `SELECT * FROM ${config.table_sensor} INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor WHERE ${config.table_sensor}.id = ?`;
         return this.execQuery(query,key);
     }
 
     getAllValue(key){
-        const query = `SELECT * FROM ${config.table_sensor} INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor GROUP BY ${config.table_sensor}.id`;
+        const query = `SELECT * FROM ${config.table_value} ORDER BY ${config.table_value}.id`;
         return this.execQuery(query,key);
     }
 
-    /*
-
-    addData(key,value){
-        let date = new Date()
-        const query = `INSERT INTO data(name, path, date) VALUES (?,?,?)`;
-        return this.execQuery(query,[key,value,date]);
+    addValue(sensor, lux, temperature, humidity){
+        const query = `INSERT INTO ${config.table_value}(id_sensor,lux,humidity,temperature) VALUES (?,?,?,?)`;
+        return this.execQuery(query,[sensor,lux,humidity,temperature]);
     }
+
+    /*
 
     updateData(key,value){
         let date = new Date()

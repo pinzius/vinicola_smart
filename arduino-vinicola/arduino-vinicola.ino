@@ -1,7 +1,8 @@
 #include <Adafruit_Sensor.h>
 #include <LiquidCrystal.h>
 
-#include "DHT.h"
+#include <DHT.h>
+#include <DHT_U.h>
 
 /*
 Circuito: 
@@ -19,7 +20,7 @@ Circuito:
  * pin DX potenziometro/trimmer collegato a GND 
  * i pin SX e DX del potenziometro/trimmer possono essere interscambiati 
 */  
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);  
+LiquidCrystal lcd(12, 11, 5, 4, 3, 7);  
 
 //led rgb
 #define pin_red 6
@@ -33,13 +34,16 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 int sensorVal;
 int lux;
+float hum;
+float temp;
 
 //dht11
-#define DHTPIN 7
+#define DHTPIN 2
 #define DHTTYPE DHT11
 
-DHT dht(DHTPIN, DHTTYPE);
+DHT_Unified dht(DHTPIN, DHTTYPE);
 
+uint32_t delayMS;
 
 void setup() {  
   //setup lcd
@@ -51,37 +55,49 @@ void setup() {
 
   colorLed(255,255,255);
   Serial.begin(9600);
-  //dht.begin();
+
+  dht.begin();
 }  
   
 void loop() {  
 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Sens:1");
+
   sensorVal = analogRead(pin_photor);
   lux=sensorRawToPhys(sensorVal);
-  lcd.setCursor(0, 0);
-  lcd.print("Raw: ");
-  lcd.print(sensorVal);
-  lcd.print("Lux: ");
+  lcd.print(" Lux:");
   lcd.print(lux);
 
-/*
   lcd.setCursor(0, 1);    
-  int t = dht.readTemperature();
-  delay(100);
-  int h = dht.readHumidity();
+  sensors_event_t event;
 
-  lcd.print("T: ");
-  lcd.print(t);
-  lcd.print(" U: ");
-  lcd.print(h);
-  */
-  Serial.print("t: ");
-  Serial.println(dht.readTemperature());
-  delay(1000);
-  Serial.print("h: ");
-  Serial.println(dht.readHumidity());
+  dht.temperature().getEvent(&event);
+  if (isnan(event.temperature)) {
+    lcd.print(F("ERR T "));
+  }
+  else {
+    lcd.print("T:");
+    temp = event.temperature;
+    lcd.print(temp);
+  }
+  // Get humidity event and print its value.
+  dht.humidity().getEvent(&event);
+  if (isnan(event.relative_humidity)) {
+    lcd.print(F("ERR H"));
+  }
+  else {
+    lcd.print(" H:");
+    hum = event.relative_humidity;
+    lcd.print(hum);
+  }
 
-  delay(2000);
+  Serial.println("1-"+String(lux)+"-"+String(temp)+"-"+String(hum));
+
+  Serial.println("2-"+String(lux)+"-"+String(temp+2)+"-"+String(hum-1));
+
+  delay(10000);
   
 }  
 

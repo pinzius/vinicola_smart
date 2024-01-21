@@ -1,1 +1,88 @@
-<h2>INDEX</h2>
+<div style="width: 800px;"><h2>Temperature</h2><canvas id="sensor_temp"></canvas></div>
+<div style="width: 800px;"><h2>Humidity</h2><canvas id="sensor_hum"></canvas></div>
+<div style="width: 800px;"><h2>Lux</h2><canvas id="sensor_lux"></canvas></div>
+<script src="chart.js/dist/chart.umd.js"></script>
+<script>
+
+    const labels = [];
+    let temp = [];
+    let hum = [];
+    let lux = [];
+    const color = ['rgb(75, 192, 192)','rgb(255, 192, 192)']
+    const dataTemp = [];
+    const dataHum = [];
+    const dataLux = [];
+
+    (async function(){
+        let data = await fetch('/getAllData');
+        data = await data.json();
+        data = JSON.parse(data.info)
+        
+        console.log({data})
+        for(const sensor in data){
+            hum = [];
+            temp = [];
+            lux = [];
+            for(const value of data[sensor]){
+                temp.push(value.temperature);
+                hum.push(value.humidity);
+                lux.push(value.lux);
+                let date = new Date(value.timestamp);
+                if (!labels.includes(`${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`))
+                    labels.push(`${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`);
+            }
+            dataTemp.push({
+                label: `Sensor ${sensor}`,
+                data: temp,
+                fill: false,
+                borderColor: color[sensor],
+                tension: 0.1
+            });
+            dataHum.push({
+                label: `Sensor ${sensor}`,
+                data: hum,
+                fill: false,
+                borderColor: color[sensor],
+                tension: 0.1
+            });
+            dataLux.push({
+                label: `Sensor ${sensor}`,
+                data: lux,
+                fill: false,
+                borderColor: color[sensor],
+                tension: 0.1
+            });
+            console.log({temp,hum,lux});
+        }
+        
+        console.log({dataHum,dataTemp,dataLux,labels})
+
+        new Chart(
+            document.getElementById('sensor_temp'),{
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: dataTemp
+            }
+            }
+        );
+        new Chart(
+            document.getElementById('sensor_hum'),{
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: dataHum
+            }
+            }
+        );
+        new Chart(
+            document.getElementById('sensor_lux'),{
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: dataLux
+            }
+            }
+        );
+    })();
+</script>

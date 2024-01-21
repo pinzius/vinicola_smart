@@ -1,0 +1,27 @@
+<table id="tab_values" class="display" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Id sensor</th>
+            <th>Humidity</th>
+            <th>Temperature</th>
+            <th>Lux</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        {{#each _locals}}
+            <tr>
+                <td data-sort={{orderDate timestamp}}>{{parseDate timestamp}}</td>
+                <td>{{id_sensor}}</td>
+                <td>{{humidity}}%</td>
+                <td>{{temperature}}°</td>
+                <td>{{lux}}</td>
+            </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<script>
+    new DataTable('#tab_values');
+</script>

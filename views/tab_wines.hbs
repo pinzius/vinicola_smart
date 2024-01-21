@@ -1,0 +1,27 @@
+<table id="tab_wines" class="display" style="width: 100%;">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Threshold Humidity</th>
+            <th>Threshold Temperature</th>
+            <th>Threshold Lux</th>
+        </tr>
+    </thead>
+    
+    <tbody>
+        {{#each _locals}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{name}}</td>
+                <td>{{t_humidity}}%</td>
+                <td>{{t_temperature}}°C</td>
+                <td>{{t_lux}}</td>
+            </tr>
+        {{/each}}
+    </tbody>
+</table>
+
+<script>
+    new DataTable('#tab_wines');
+</script>

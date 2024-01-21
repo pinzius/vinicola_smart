@@ -1,4 +1,4 @@
-//const Arduino = require('./Arduino');
+const Arduino = require('./Arduino');
 const Store = require('./Store');
 const config = require('./config');
 
@@ -14,9 +14,9 @@ const datatable = require('datatables.net');
 
 const app = express();
 
-//const arduino = new Arduino();
-const store = new Store;
-store.construct();
+const arduino = new Arduino();
+const store = new Store();
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -25,34 +25,60 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '/views/css'));
 app.use(express.static(__dirname + '/views/js'));
 app.use(express.static(__dirname + '/lib'));
-
+app.use(express.static(__dirname + '/node_modules'));
 
 hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'))
 
+hbs.registerHelper("parseDate", function(ts) {
+    let date = new Date(ts);
+    return `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+});
+hbs.registerHelper("orderDate", function(ts) {
+    let date = new Date(ts);
+    return `"${date.getFullYear()}/${date.getMonth()}/${date.getDate()}"`;
+});
+hbs.registerHelper("log", function(something) {
+    console.log(something);
+});
+
 //-------------------NODE SERVER----------------------------
 
-app.get('/', (req,res)=>{
-
+app.get('/', async(req,res)=>{
     res.render('index');
+});
+
+app.get('/getAllData', async(req,res)=>{
+    const sensor = await store.getAllSensor();
+    const data = {};
+
+    for(const s of sensor){
+        data[s.id] = await store.getValue(s.id);
+    }
+
+    res.send({info: JSON.stringify(data), success:true});
 });
 
 app.get('/tab_sensors', async (req,res)=>{
     const data = await store.getAllSensor();
 
-    console.log(data)
-
     res.locals = data;
     res.render('tab_sensors');
 });
 
-app.get('/tab_values', (req,res)=>{
-    
+app.get('/tab_values', async(req,res)=>{
+    const data = await store.getAllValue();
+
+    res.locals = data;
+    res.render('tab_values');
 });
 
-app.get('/tab_wines', (req,res)=>{
-    
+app.get('/tab_wines', async(req,res)=>{
+    const data = await store.getAllWine();
+
+    res.locals = data;
+    res.render('tab_wines');
 });
 
 app.listen(config.node_port, config.ip, function () {
@@ -100,8 +126,10 @@ wsServer.on('request', function(request) {
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
             console.log('Received Message: ' + message.utf8Data);
+            let infos = (message.utf8Data).split('-');
+            store.addValue(parseInt(infos[0]),parseFloat(infos[1]),parseFloat(infos[2]),parseFloat(infos[3]))
             clients.forEach(client => {
-              client.send(message.utf8Data);
+              client.send('New data');
             });
         }
         else if (message.type === 'binary') {

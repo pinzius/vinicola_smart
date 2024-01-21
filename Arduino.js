@@ -8,11 +8,9 @@ const WS_URL = `http://${config.ip}:${config.ws_port}`;
 class Arduino{
     constructor(){
         this.arduinoSerialPort = new SerialPort({
-            path: 'COM8',
+            path: 'COM5',
             baudRate:9600
         });
-        this.cb = ()=>{};
-
         this.socket = new wsClient(WS_URL, 'echo-protocol');
 
         console.log(this.socket.readyState);
@@ -23,12 +21,11 @@ class Arduino{
 
         this.parser = this.arduinoSerialPort.pipe(new ReadlineParser({ delimiter: '\n' }));
         this.arduinoSerialPort.on('open',function() {
-            console.log('Serial Port COM8 is opened.');
+            console.log('Serial Port COM5 is opened.');
           });
 
         this.parser.on('data', data =>{
             console.log('got word from arduino:', data);
-            this.cb(data);
             if(this.socket.readyState == 1)
                 this.socket.send(data);
           });  
@@ -40,9 +37,6 @@ class Arduino{
         if(colore) this.arduinoSerialPort.write(colore,"hex");            
     }
 
-    onData(cb){
-        this.cb = cb;
-    }
 }
 
 
