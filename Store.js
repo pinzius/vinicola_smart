@@ -35,7 +35,17 @@ class Store{
         const query = `SELECT * FROM ${config.table_sensor} 
 INNER JOIN ${config.table_wine} ON ${config.table_sensor}.id_wine = ${config.table_wine}.id 
 INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor
-ORDER BY ${config.table_sensor}.id`;
+ORDER BY ${config.table_sensor}.id, ${config.table_sensor}.timestamp`;
+        return this.execQuery(query);
+    }
+
+    getDataGroupHour(){
+        const query = `SELECT dht.id_sensor, dht.timestamp, AVG(dht.temperature) as AVG_TEMP, AVG(dht.humidity) as AVG_HUM, AVG(dht.lux) as AVG_LUX, w.name as W_NAME, w.t_humidity as W_HUM, w.t_temperature as W_TEMP, w.t_lux as W_LUX
+from ${config.table_value} as dht
+inner join ${config.table_sensor} as s on s.id = dht.id_sensor
+inner join ${config.table_wine} as w on w.id = s.id_wine
+group by dht.id_sensor, HOUR(dht.timestamp)
+order by dht.id_sensor`;
         return this.execQuery(query);
     }
 

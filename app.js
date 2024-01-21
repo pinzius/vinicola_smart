@@ -1,4 +1,4 @@
-const Arduino = require('./Arduino');
+//const Arduino = require('./Arduino');
 const Store = require('./Store');
 const config = require('./config');
 
@@ -14,7 +14,7 @@ const datatable = require('datatables.net');
 
 const app = express();
 
-const arduino = new Arduino();
+//const arduino = new Arduino();
 const store = new Store();
 
 
@@ -49,15 +49,10 @@ app.get('/', async(req,res)=>{
     res.render('index');
 });
 
-app.get('/getAllData', async(req,res)=>{
-    const sensor = await store.getAllSensor();
-    const data = {};
+app.get('/getDataGroupHour', async(req,res)=>{
+    const sensor = await store.getDataGroupHour();
 
-    for(const s of sensor){
-        data[s.id] = await store.getValue(s.id);
-    }
-
-    res.send({info: JSON.stringify(data), success:true});
+    res.send({info: JSON.stringify(sensor), success:true});
 });
 
 app.get('/tab_sensors', async (req,res)=>{
