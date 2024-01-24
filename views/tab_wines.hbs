@@ -22,6 +22,92 @@
     </tbody>
 </table>
 
+<div class="modal fade" id="modalModWine" tabindex="-1" role="dialog" aria-labelledby="modalModWineLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalModWineLabel"></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                Wine: <span id="idWine"></span> - <input type="text" name="inpNameWine" id="inpNameWine"><br>                
+                <label for="inpThum">Threshold Humidity</label>
+                <input type="number" name="inpThum" id="inpThum"><br>
+                <label for="inpTtemp">Threshold Temperature</label>
+                <input type="number" name="inpTtemp" id="inpTtemp"><br>
+                <label for="inpTlux">Max Lux</label>
+                <input type="number" name="inpTlux" id="inpTlux"><br>
+                <button type="button" class="btn btn-primary" id="btnModWine">Apply</button>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    new DataTable('#tab_wines');
+    let table = new DataTable('#tab_wines',{
+        dom: "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
+			"<'row'<'col-sm-12'tr>>" +
+			"<'row'<'col-sm-12 col-md-5'li><'col-sm-12 col-md-7'p>>",
+        buttons:[{
+            text: 'Edit',
+            action: async function(){
+                document.getElementById('modalModWineLabel').innerHTML = "Edit wine";
+                document.getElementById('idWine').innerHTML = table.rows({selected:true}).data()[0][0];
+                document.getElementById('inpNameWine').value = table.rows({selected:true}).data()[0][1];
+                document.getElementById('inpThum').value = parseFloat(table.rows({selected:true}).data()[0][2]);
+                document.getElementById('inpTtemp').value = parseFloat(table.rows({selected:true}).data()[0][3]);
+                document.getElementById('inpTlux').value = parseFloat(table.rows({selected:true}).data()[0][4]);
+                $('#modalModWine').modal('show');
+            }
+        },{
+            text: 'Add',
+            action: async function(){
+                document.getElementById('modalModWineLabel').innerHTML = "New wine";
+                document.getElementById('idWine').innerHTML = table.rows().count()+1;
+                $('#modalModWine').modal('show');
+            }
+        }],
+        select: true
+    });
+    document.getElementById('btnModWine').addEventListener('click',async()=>{
+        if(document.getElementById('modalModWineLabel').innerHTML == "Edit wine"){
+            await fetch('/updateWine', {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    id: document.getElementById('idWine').innerHTML,
+                    name: document.getElementById('inpNameWine').value,
+                    t_hum: document.getElementById('inpThum').value,
+                    t_temp: document.getElementById('inpTtemp').value,
+                    t_lux: document.getElementById('inpTlux').value
+                })
+            });
+        }else{
+            await fetch('/addWine', {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    name: document.getElementById('inpNameWine').value,
+                    t_hum: document.getElementById('inpThum').value,
+                    t_temp: document.getElementById('inpTtemp').value,
+                    t_lux: document.getElementById('inpTlux').value
+                })
+            });
+        }
+        
+        location.reload();
+    });
 </script>

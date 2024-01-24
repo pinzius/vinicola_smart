@@ -49,6 +49,15 @@ order by dht.id_sensor`;
         return this.execQuery(query);
     }
 
+    getLastData(){
+        const query=`select dht.timestamp, dht.id_sensor, dht.humidity, dht.temperature, dht.lux, w.name, w.t_humidity,w.t_temperature,w.t_lux
+from ${config.table_value} as dht 
+inner join ${config.table_sensor} as s on s.id = dht.id_sensor
+inner join ${config.table_wine} as w on w.id = s.id_wine
+where dht.timestamp = (select timestamp from ${config.table_value} order by ${config.table_value}.timestamp DESC limit 1);`;
+        return this.execQuery(query);
+    }
+
     getSensor(key){
         const query = `SELECT ${config.table_sensor}.id,${config.table_wine}.id,${config.table_wine}.name FROM ${config.table_sensor} 
 INNER JOIN ${config.table_wine} ON ${config.table_sensor}.id_wine = ${config.table_wine}.id 
@@ -67,24 +76,52 @@ INNER JOIN ${config.table_wine} ON ${config.table_sensor}.id_wine = ${config.tab
         return this.execQuery(query,key);
     }
 
-    getAllWine(key){
+    getAllWine(){
         const query = `SELECT * FROM ${config.table_wine}`;
-        return this.execQuery(query,key);
+        return this.execQuery(query);
     }
 
     getValue(key){
-        const query = `SELECT * FROM ${config.table_sensor} INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor WHERE ${config.table_sensor}.id = ?`;
+        const query = `SELECT * 
+FROM ${config.table_sensor} 
+INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor 
+INNER JOIN ${config.table_wine} ON ${config.table_wine}.id = ${config.table_sensor}.id_wine
+WHERE ${config.table_sensor}.id = ?`;
         return this.execQuery(query,key);
     }
 
-    getAllValue(key){
-        const query = `SELECT * FROM ${config.table_value} ORDER BY ${config.table_value}.id`;
-        return this.execQuery(query,key);
+    getAllValue(){
+        const query = `SELECT * 
+FROM ${config.table_sensor} 
+INNER JOIN ${config.table_value} ON ${config.table_sensor}.id = ${config.table_value}.id_sensor 
+INNER JOIN ${config.table_wine} ON ${config.table_wine}.id = ${config.table_sensor}.id_wine
+ORDER BY ${config.table_value}.timestamp ASC`;
+        return this.execQuery(query);
     }
 
     addValue(sensor, lux, temperature, humidity){
         const query = `INSERT INTO ${config.table_value}(id_sensor,lux,humidity,temperature) VALUES (?,?,?,?)`;
         return this.execQuery(query,[sensor,lux,humidity,temperature]);
+    }
+
+    addSensor(wine){
+        const query = `INSERT INTO ${config.table_sensor}(id_wine) VALUES(?)`;
+        return this.execQuery(query, wine);
+    }
+
+    updateSensor(sensor,wine){
+        const query = `UPDATE ${config.table_sensor} SET id_wine=? WHERE id=?`
+        return this.execQuery(query,[wine,sensor]);
+    }
+
+    addWine(params){
+        const query = `INSERT INTO ${config.table_wine}(name, t_humidity, t_temperature, t_lux) VALUES (?,?,?,?)`;
+        return this.execQuery(query,params);
+    }
+
+    updateWine(params){
+        const query = `UPDATE ${config.table_wine} SET name=?, t_humidity=?, t_temperature=?, t_lux=? WHERE id=?`;
+        return this.execQuery(query,params)
     }
 
     /*

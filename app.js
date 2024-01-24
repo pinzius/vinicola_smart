@@ -1,4 +1,4 @@
-//const Arduino = require('./Arduino');
+const Arduino = require('./Arduino');
 const Store = require('./Store');
 const config = require('./config');
 
@@ -10,11 +10,10 @@ const express = require('express');
 const cors = require('cors');
 const hbs = require('hbs');
 const fs = require('fs');
-const datatable = require('datatables.net');
 
 const app = express();
 
-//const arduino = new Arduino();
+const arduino = new Arduino();
 const store = new Store();
 
 
@@ -37,7 +36,22 @@ hbs.registerHelper("parseDate", function(ts) {
 });
 hbs.registerHelper("orderDate", function(ts) {
     let date = new Date(ts);
-    return `"${date.getFullYear()}/${date.getMonth()}/${date.getDate()}"`;
+    return `${date.getFullYear()}/${date.getMonth()}/${date.getDate()}/${date.getHours()}/${date.getMinutes()<10?('0'+date.getMinutes()):date.getMinutes()}/${date.getSeconds()}`;
+});
+hbs.registerHelper("confTemp", function(temp,t_temp) {
+    if(temp<t_temp+1&&temp>t_temp-1)
+        return true;
+    return false;
+});
+hbs.registerHelper("confHum", function(hum,t_hum) {
+    if(hum<t_hum+3&&hum>t_hum-3)
+        return true;
+    return false;
+});
+hbs.registerHelper("confLux", function(lux,t_lux) {
+    if(lux<t_lux)
+        return true;
+    return false;
 });
 hbs.registerHelper("log", function(something) {
     console.log(something);
@@ -53,6 +67,54 @@ app.get('/getDataGroupHour', async(req,res)=>{
     const sensor = await store.getDataGroupHour();
 
     res.send({info: JSON.stringify(sensor), success:true});
+});
+
+app.get('/getWines', async(req,res)=>{
+    const data = await store.getAllWine();
+
+    res.send({info: JSON.stringify(data), success:true});
+});
+
+app.get('/lastValue', async(req,res)=>{
+    const data = await store.getLastData();
+
+    res.send({info: JSON.stringify(data), success:true});
+});
+
+app.post('/updateSensor', async(req,res)=>{
+    try{
+        await store.updateSensor(req.body.sensor,req.body.wine);
+        res.send({success: true});
+    }catch(e){
+        res.send({success: false});
+    }
+});
+
+app.post('/addSensor', async(req,res)=>{
+    try{
+        await store.addSensor(req.body.wine);
+        res.send({success: true});
+    }catch(e){
+        res.send({success: false});
+    }
+});
+
+app.post('/updateWine', async(req,res)=>{
+    try{
+        await store.updateWine([req.body.name, req.body.t_hum, req.body.t_temp, req.body.t_lux,req.body.id]);
+        res.send({success: true});
+    }catch(e){
+        res.send({success: false});
+    }
+});
+
+app.post('/addWine', async(req,res)=>{
+    try{
+        await store.addWine([req.body.name, req.body.t_hum, req.body.t_temp, req.body.t_lux]);
+        res.send({success: true});
+    }catch(e){
+        res.send({success: false});
+    }
 });
 
 app.get('/tab_sensors', async (req,res)=>{
@@ -75,6 +137,15 @@ app.get('/tab_wines', async(req,res)=>{
     res.locals = data;
     res.render('tab_wines');
 });
+
+
+app.post('/ledColor',(req,res)=>{
+    const color = req.body.color;
+    //const sensor = req.body.sensor;
+
+    arduino.sendColor(color);
+});
+
 
 app.listen(config.node_port, config.ip, function () {
     console.log(`Node vinicola listening on ${config.node_port}`);

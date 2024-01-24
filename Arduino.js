@@ -31,10 +31,9 @@ class Arduino{
           });  
     }
 
-    sendData(mode,colore){
-        console.log(`send to arduino: ${mode} ${colore}`);
-        this.arduinoSerialPort.write(mode, "ascii");
-        if(colore) this.arduinoSerialPort.write(colore,"hex");            
+    sendColor(hex){
+        console.log(`send to arduino: ${hex}`);
+        this.arduinoSerialPort.write(hex,"hex");            
     }
 
 }

@@ -11,7 +11,7 @@ Circuito:
  * pin D4 collegato al pin digitale 5 
  * pin D5 collegato al pin digitale 4 
  * pin D6 collegato al pin digitale 3 
- * pin D7 collegato al pin digitale 2 
+ * pin D7 collegato al pin digitale 7 
  * pin R/W collegato al GND 
  * pin 1 e pin 4 collegati a GND 
  * pin 2 collegato a +Vcc 
@@ -45,6 +45,12 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 
 uint32_t delayMS;
 
+int r;
+int g;
+int b;
+
+int rounds;
+
 void setup() {  
   //setup lcd
   lcd.begin(16, 2);  
@@ -57,47 +63,65 @@ void setup() {
   Serial.begin(9600);
 
   dht.begin();
+
+  r=255;
+  g=255;
+  b=255;
+  rounds=-1;
+
 }  
   
 void loop() {  
 
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Sens:1");
+  if(rounds<1000&&rounds>-1){
+    rounds++;
+  }else{
+    rounds = 0;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Sens:1");
 
-  sensorVal = analogRead(pin_photor);
-  lux=sensorRawToPhys(sensorVal);
-  lcd.print(" Lux:");
-  lcd.print(lux);
+    sensorVal = analogRead(pin_photor);
+    lux=sensorRawToPhys(sensorVal);
+    lcd.print(" Lux:");
+    lcd.print(lux);
 
-  lcd.setCursor(0, 1);    
-  sensors_event_t event;
+    lcd.setCursor(0, 1);    
+    sensors_event_t event;
 
-  dht.temperature().getEvent(&event);
-  if (isnan(event.temperature)) {
-    lcd.print(F("ERR T "));
+    dht.temperature().getEvent(&event);
+    if (isnan(event.temperature)) {
+      lcd.print(F("ERR T "));
+    }
+    else {
+      lcd.print("T:");
+      temp = event.temperature;
+      lcd.print(temp);
+    }
+    // Get humidity event and print its value.
+    dht.humidity().getEvent(&event);
+    if (isnan(event.relative_humidity)) {
+      lcd.print(F("ERR H"));
+    }
+    else {
+      lcd.print(" H:");
+      hum = event.relative_humidity;
+      lcd.print(hum);
+    }
+
+    Serial.println("1-"+String(lux)+"-"+String(temp)+"-"+String(hum));
+
+    Serial.println("2-"+String(lux)+"-"+String(temp+2)+"-"+String(hum-1));
   }
-  else {
-    lcd.print("T:");
-    temp = event.temperature;
-    lcd.print(temp);
-  }
-  // Get humidity event and print its value.
-  dht.humidity().getEvent(&event);
-  if (isnan(event.relative_humidity)) {
-    lcd.print(F("ERR H"));
-  }
-  else {
-    lcd.print(" H:");
-    hum = event.relative_humidity;
-    lcd.print(hum);
+
+  if(Serial.available() > 0) {
+    r = Serial.read();
+    g = Serial.read();
+    b = Serial.read();
+    colorLed(r,g,b);
   }
 
-  Serial.println("1-"+String(lux)+"-"+String(temp)+"-"+String(hum));
-
-  Serial.println("2-"+String(lux)+"-"+String(temp+2)+"-"+String(hum-1));
-
-  delay(10000);
+  delay(100);
   
 }  
 

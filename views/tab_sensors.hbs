@@ -18,6 +18,98 @@
     </tbody>
 </table>
 
+<div class="modal fade" id="modalSensor" tabindex="-1" role="dialog" aria-labelledby="modalSensorLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="modalSensorLabel">Edit sensor:</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                <p style="margin-bottom: 0px;">ID Sensor: <span id="inputIdSensor"></span> </p>
+                <label for="inputWine"></label>
+                <select name="inputWine" id="inputWine"></select>
+                <button type="button" class="btn btn-primary" id="btnModWine">Apply</button>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="btnModalClear">Clear</button>
+        </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    new DataTable('#tab_sensor');
+    let table = new DataTable('#tab_sensor',{
+        dom: "<'row'<'col-sm-12 col-md-6'B><'col-sm-12 col-md-6'f>>" +
+			"<'row'<'col-sm-12'tr>>" +
+			"<'row'<'col-sm-12 col-md-5'li><'col-sm-12 col-md-7'p>>",
+        buttons:[{
+            text: 'Edit',
+            action: async function(){
+                document.getElementById('modalSensorLabel').innerHTML = "Edit sensor";
+                document.getElementById('inputIdSensor').innerHTML = table.rows({selected:true}).data()[0][0];
+                let wines = await fetch('/getWines');
+                wines = await wines.json();
+                wines = JSON.parse(wines.info);
+                console.log({wines})
+                const select = document.getElementById('inputWine');
+                select.innerHTML = '';
+                for(const w of wines){
+                    select.innerHTML += `<option value=${w.id}>${w.name}</option>`;
+                }
+                select.value =  table.rows({selected:true}).data()[0][1];
+                $('#modalSensor').modal('show');
+            }
+        },{
+            text: 'Add',
+            action: async function(){
+                document.getElementById('modalSensorLabel').innerHTML = "New sensor";
+                document.getElementById('inputIdSensor').innerHTML = table.rows().count()+1;
+                let wines = await fetch('/getWines');
+                wines = await wines.json();
+                wines = JSON.parse(wines.info);
+                console.log({wines})
+                const select = document.getElementById('inputWine');
+                select.innerHTML = '';
+                for(const w of wines){
+                    select.innerHTML += `<option value=${w.id}>${w.name}</option>`;
+                }
+                $('#modalSensor').modal('show');
+            }
+        }],
+        select: true
+    });
+    document.getElementById('btnModWine').addEventListener('click',async()=>{
+        if(document.getElementById('modalSensor').innerHTML == "Edit sensor"){
+            await fetch('/updateSensor', {
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    sensor: document.getElementById('inputIdSensor').innerHTML,
+                    wine: document.getElementById('inputWine').value
+                })
+            });
+        }else{
+            await fetch('/addSensor',{
+                method: 'POST',
+                headers: {
+                    "Content-type": "application/json; charset=UTF-8"
+                },
+                body: JSON.stringify({
+                    sensor: document.getElementById('inputIdSensor').innerHTML,
+                    wine: document.getElementById('inputWine').value
+                })
+            })
+        }
+        location.reload();
+    });
 </script>
