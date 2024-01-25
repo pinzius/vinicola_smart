@@ -73,7 +73,7 @@ void setup() {
   
 void loop() {  
 
-  if(rounds<1000&&rounds>-1){
+  if(rounds<100&&rounds>-1){
     rounds++;
   }else{
     rounds = 0;
@@ -111,7 +111,6 @@ void loop() {
 
     Serial.println("1-"+String(lux)+"-"+String(temp)+"-"+String(hum));
 
-    Serial.println("2-"+String(lux)+"-"+String(temp+2)+"-"+String(hum-1));
   }
 
   if(Serial.available() > 0) {
@@ -129,7 +128,7 @@ int sensorRawToPhys(int raw){
   // Conversion rule
   float Vout = float(raw) * (VIN / float(1023));// Conversion analog to voltage
   float RLDR = (R * (VIN - Vout))/Vout; // Conversion voltage to resistance
-  int phys=500/(RLDR/1000); // Conversion resitance to lumen
+  int phys=500/(RLDR/1000); // Conversion resistance to lumen
   return phys;
 }
 

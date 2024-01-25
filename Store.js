@@ -99,9 +99,18 @@ ORDER BY ${config.table_value}.timestamp ASC`;
         return this.execQuery(query);
     }
 
-    addValue(sensor, lux, temperature, humidity){
-        const query = `INSERT INTO ${config.table_value}(id_sensor,lux,humidity,temperature) VALUES (?,?,?,?)`;
-        return this.execQuery(query,[sensor,lux,humidity,temperature]);
+    addValue(sensor, date, lux, temperature, humidity){
+        const query = `INSERT INTO ${config.table_value}(id_sensor,timestamp,lux,humidity,temperature) VALUES (?,?,?,?,?)`;
+        return this.execQuery(query,[sensor,date,lux,humidity,temperature]);
+    }
+
+    checkValue(id_sensor, timestamp){
+        const query = `select *
+from ${config.table_value} as dht
+inner join ${config.table_sensor} as s on s.id=dht.id_sensor
+inner join ${config.table_wine} as w on w.id=s.id_wine
+where ((dht.humidity>w.t_humidity+3 OR dht.humidity<w.t_humidity-3) OR (dht.temperature>w.t_temperature+2 OR dht.temperature<w.t_temperature-2) OR (dht.lux>w.t_lux) ) AND dht.id_sensor = ? AND dht.timestamp = ?;`;
+        return this.execQuery(query, [id_sensor,timestamp]);
     }
 
     addSensor(wine){

@@ -9,7 +9,6 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
 const hbs = require('hbs');
-const fs = require('fs');
 
 const app = express();
 
@@ -119,7 +118,6 @@ app.post('/addWine', async(req,res)=>{
 
 app.get('/tab_sensors', async (req,res)=>{
     const data = await store.getAllSensor();
-
     res.locals = data;
     res.render('tab_sensors');
 });
@@ -148,7 +146,7 @@ app.post('/ledColor',(req,res)=>{
 
 
 app.listen(config.node_port, config.ip, function () {
-    console.log(`Node vinicola listening on ${config.node_port}`);
+    console.log(`Wine Guardian listening on ${config.node_port}`);
 });
 
 
@@ -189,11 +187,20 @@ wsServer.on('request', function(request) {
     const connection = request.accept('echo-protocol', request.origin);
     clients.push(connection);
     console.log((new Date()) + ' Connection accepted.');
-    connection.on('message', function(message) {
+    connection.on('message', async function(message) {
         if (message.type === 'utf8') {
             console.log('Received Message: ' + message.utf8Data);
             let infos = (message.utf8Data).split('-');
-            store.addValue(parseInt(infos[0]),parseFloat(infos[1]),parseFloat(infos[2]),parseFloat(infos[3]))
+            let date = new Date();
+            date.setHours(date.getHours()+1);
+            date = date.toISOString().split('T')[0]+' '+date.toTimeString().split(' ')[0];
+            await store.addValue(parseInt(infos[0]),date,parseFloat(infos[1]),parseFloat(infos[2]),parseFloat(infos[3]));
+            const result = await store.checkValue(parseInt(infos[0]),date);
+            //console.log(result);
+            if(result.length>0)
+                arduino.sendColor('FF0000');
+            else
+                arduino.sendColor('00FF00');
             clients.forEach(client => {
               client.send('New data');
             });

@@ -74,22 +74,7 @@
             strTable += '<td>'+`${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`+'</td>'
             strTable += `</tr>`;
             divTable.innerHTML += strTable;
-            
-            
-            if(sensor.id_sensor == 1){
-                    let color = '00FF00';
-                    if(strModal.length != '')
-                        color = 'FF0000';
-                    fetch('/ledColor',{
-                    method: 'POST',
-                    headers: {
-                        "Content-type": "application/json; charset=UTF-8"
-                    },
-                    body: JSON.stringify({
-                        color
-                    })
-                })
-            }
+        
         }
     })();
 
